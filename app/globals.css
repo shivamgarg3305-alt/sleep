@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* App is dark-mode only by design — these tokens live on :root directly
+       rather than under a `.dark` class, since there is no light theme. */
+    --background: 240 10% 2%;          /* near-OLED black */
+    --foreground: 210 20% 96%;
+
+    --card: 240 8% 6%;
+    --card-foreground: 210 20% 96%;
+
+    --popover: 240 8% 6%;
+    --popover-foreground: 210 20% 96%;
+
+    --primary: 239 84% 67%;            /* indigo-500 */
+    --primary-foreground: 240 10% 4%;
+
+    --secondary: 240 6% 12%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 240 6% 12%;
+    --muted-foreground: 240 5% 58%;
+
+    --accent: 199 89% 64%;             /* sky-400 glow accent */
+    --accent-foreground: 240 10% 4%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 20% 96%;
+
+    --border: 240 6% 16%;
+    --input: 240 6% 16%;
+    --ring: 239 84% 67%;
+
+    --radius: 1rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image: radial-gradient(
+      ellipse 80% 50% at 50% -10%,
+      rgba(99, 102, 241, 0.12),
+      transparent
+    );
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  /* Subtle noise-free "glass" card used across the dashboard */
+  .glass-panel {
+    @apply bg-card/60 backdrop-blur-xl border border-white/[0.06];
+  }
+
+  .text-glow {
+    text-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+  }
+}
