@@ -1,28 +1,39 @@
 import { getSleepStats } from "@/app/actions/sleep";
+import { getUserProfile } from "@/app/actions/profile";
+import { computeSleepScore } from "@/lib/sleep-score";
 
 import { AnalyticsSection } from "./analytics-section";
 
-/**
- * Isolated as its own async component (rather than fetched inline in
- * DashboardPage) so it can be wrapped in <Suspense> — the sleep toggle
- * paints immediately, this streams in a beat later behind a skeleton.
- */
 export async function AnalyticsLoader() {
-  const result = await getSleepStats(7);
+  const [statsResult, profileResult] = await Promise.all([
+    getSleepStats(7),
+    getUserProfile(),
+  ]);
 
-  if (!result.success) {
+  if (!statsResult.success) {
     return (
       <div className="glass-panel w-full max-w-md rounded-2xl p-6 text-center text-sm text-destructive">
-        Couldn&apos;t load insights: {result.error}
+        Couldn&apos;t load insights: {statsResult.error}
       </div>
     );
   }
 
+  const profile = profileResult.success ? profileResult.data : null;
+  const hasProfile = Boolean(profile?.dateOfBirth && profile?.biologicalSex);
+
+  const score = hasProfile
+    ? computeSleepScore({
+        sessions: statsResult.data.sessions,
+        dateOfBirth: profile!.dateOfBirth,
+      })
+    : null;
+
   return (
     <AnalyticsSection
-      mostRecent={result.data.mostRecent}
-      averageDurationMin={result.data.averageDurationMin}
-      sessions={result.data.sessions}
+      mostRecent={statsResult.data.mostRecent}
+      averageDurationMin={statsResult.data.averageDurationMin}
+      sessions={statsResult.data.sessions}
+      score={score}
     />
   );
 }

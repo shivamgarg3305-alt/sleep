@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import Image from "next/image";
 
 import { auth } from "@/auth";
@@ -9,23 +10,16 @@ import { BottomNav } from "@/components/nav/bottom-nav";
 import { AnalyticsLoader } from "@/components/analytics/analytics-loader";
 import { AnalyticsSkeleton } from "@/components/analytics/analytics-skeleton";
 import { getActiveSleepSession } from "@/app/actions/sleep";
+import { getUserProfile } from "@/app/actions/profile";
 
-/**
- * Protected dashboard: single scrollable page with two sections —
- * #sleep (the One-Tap toggle) and #insights (stats + 7-day chart) — that
- * the responsive nav (bottom bar on mobile, sidebar on desktop) scrolls
- * between.
- *
- * The active sleep session is fetched up front since it drives the primary
- * button's state. Insights are fetched in a separate async component
- * (<AnalyticsLoader>) wrapped in <Suspense>, so the toggle paints
- * immediately and the analytics stream in a beat later behind a skeleton
- * rather than blocking the whole page on a second query.
- */
 export default async function DashboardPage() {
-  // Safe to assert non-null: middleware guarantees a session reached this point.
   const session = await auth();
   const user = session!.user;
+
+  const profileResult = await getUserProfile();
+  if (profileResult.success && !profileResult.data.onboardedAt) {
+    redirect("/onboarding");
+  }
 
   const activeSessionResult = await getActiveSleepSession();
 
@@ -34,7 +28,6 @@ export default async function DashboardPage() {
       <Sidebar userName={user.name ?? null} userImage={user.image ?? null} />
 
       <main className="flex min-h-dvh flex-col sm:pl-20">
-        {/* Mobile-only top bar — desktop identity/sign-out lives in the sidebar */}
         <header className="flex items-center justify-between px-6 py-5 sm:hidden">
           <div className="flex items-center gap-3">
             {user.image ? (
