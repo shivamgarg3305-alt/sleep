@@ -3,11 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
-
-
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
   // If you're on Supabase's pooled connection string (port 6543 / pgbouncer)
   // or Neon's pooler, migrations need a *direct* (unpooled) connection.
   // Uncomment below and set DIRECT_URL in your .env to the non-pooled URL.
@@ -69,6 +66,15 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+
+  // Onboarding profile — powers the personalized Sleep Score ring.
+  // All nullable: a user can skip onboarding and use the app with no ring
+  // (an "add your profile" prompt shows instead until these are set).
+  biologicalSex String? // "female" | "male"
+  heightCm      Int?
+  weightKg      Float?
+  dateOfBirth   DateTime?
+  onboardedAt   DateTime? // set once onboarding is completed OR explicitly skipped
 
   accounts      Account[]
   sessions      Session[]
